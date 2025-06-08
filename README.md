@@ -33,8 +33,8 @@ Follow these steps to set up the project locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/zaibten-food.git
-cd zaibten-food
+git clone https://github.com/zaibten/Zaibten-Food-Order-Management-System-Restaurent-Side.git
+cd Zaibten-Food-Order-Management-System-Restaurent-Side
 
 # Install frontend dependencies
 cd client
