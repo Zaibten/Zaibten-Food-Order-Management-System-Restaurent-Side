@@ -89,7 +89,7 @@ const handleConfirmChange = async (bookingId, checked, booking) => {
     // If confirmed, call API to send email
     if (checked) {
       // Send booking info to API
-      await fetch("http://localhost:5000/send-confirmtablebooking-email", {
+      await fetch("foodserver-eta.vercel.app/send-confirmtablebooking-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
