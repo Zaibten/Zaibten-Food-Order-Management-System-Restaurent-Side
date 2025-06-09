@@ -1,292 +1,454 @@
-import React, { useState, useEffect } from "react";
-import "./style.css";
-import Loader from "../../Loader/loader";
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, orderBy, query, deleteDoc, doc,updateDoc  } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAd0K-Y8AnNXSJXQRZeQtphPZQPOkSAgmo",
-  authDomain: "foodplanet-82388.firebaseapp.com",
-  projectId: "foodplanet-82388",
-  storageBucket: "foodplanet-82388.firebasestorage.app",
-  messagingSenderId: "898880937459",
-  appId: "1:898880937459:web:2c23717c73ffdf2eef8686",
-  measurementId: "G-CPEP0M2EXG",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const ProfessionalSchedule = () => {
-  const [schedules, setSchedules] = useState([]);
-  const [filteredSchedules, setFilteredSchedules] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchEmail, setSearchEmail] = useState(""); 
-  const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5; 
-
-  // Fetch all bookings from Firestore
-  const fetchSchedules = async () => {
-    try {
-      setLoading(true);
-  
-      // Get the local data from localStorage
-      const localUser = JSON.parse(localStorage.getItem("data")); // Ensure this is the correct key
-      const localShopName = localUser?.shopName?.toLowerCase(); // Retrieve salon/shop name from localStorage
-  
-      const schedulesRef = collection(db, "Bookings");
-      const q = query(schedulesRef, orderBy("bookingDate", "desc"));
-      const querySnapshot = await getDocs(q);
-  
-      const schedulesData = querySnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .filter((schedule) => 
-          schedule.shopName?.toLowerCase() === localShopName // Filter by salon/shop name
-        );
-  
-      setSchedules(schedulesData);
-      setFilteredSchedules(schedulesData);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching schedules:", error);
-      setLoading(false);
-    }
-  };
-  
+const OrdersComponent = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [expandedOrderIds, setExpandedOrderIds] = useState([]);
 
   useEffect(() => {
-    fetchSchedules();
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const db = getFirestore();
+        const localUser = JSON.parse(localStorage.getItem("data"));
+        const localShopName = localUser?.shopName;
+        if (!localShopName) {
+          setError("Shop name not found in local storage.");
+          setLoading(false);
+          return;
+        }
+        const ordersRef = collection(db, "orders", localShopName, "items");
+        const q = query(ordersRef, orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        const ordersData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setOrders(ordersData);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setError("Failed to fetch orders.");
+      }
+      setLoading(false);
+    };
+    fetchOrders();
   }, []);
 
-  // Function to handle search
-  const handleSearch = (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    setSearchEmail(searchTerm);
+  const handleDeleteOrder = async (orderId) => {
+  const db = getFirestore();
+  const localUser = JSON.parse(localStorage.getItem("data"));
+  const localShopName = localUser?.shopName;
+  if (!localShopName) {
+    setError("Shop name not found in local storage.");
+    return;
+  }
 
-    if (searchTerm === "") {
-      setFilteredSchedules(schedules);
-    } else {
-      const filtered = schedules.filter((schedule) =>
-        schedule.email?.toLowerCase().includes(searchTerm)
-      );
-      setFilteredSchedules(filtered);
-    }
-  };
+  if (!window.confirm("Are you sure you want to delete this order?")) return;
 
-  // Function to cancel a booking
-  const handleCancelBooking = async (booking) => {
-    const isConfirmed = window.confirm("Are you sure you want to cancel this booking?");
-  
-    if (!isConfirmed) return; // If user cancels, do nothing
-  
-    try {
-      await deleteDoc(doc(db, "Bookings", booking.id));
-      alert("Booking canceled successfully.");
-  
-      // Send cancellation email after deleting the booking
-      const response = await fetch("http://localhost:5000/send-cancellation-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: booking.email,
-          serviceName: booking.serviceName,
-          bookingDate: booking.bookingDate,
-          bookingTime: booking.bookingTime,
-          totalPrice: booking.totalPrice,
-        }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        alert("Cancellation email sent successfully!");
-      } else {
-        alert("Failed to send cancellation email: " + data.error);
-      }
-  
-      fetchSchedules(); // Refresh bookings list
-    } catch (error) {
-      console.error("Error canceling booking:", error);
-      alert("Failed to cancel booking.");
-    }
-  };
-  
-  
-  
-
-  // Pagination logic
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = filteredSchedules.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(filteredSchedules.length / recordsPerPage);
-
-
-  const handleToggleApproval = async (id, approved) => {
   try {
-    const bookingRef = doc(db, "Bookings", id);
-    await updateDoc(bookingRef, { approved: !approved });
-    setSchedules((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, approved: !approved } : item
-      )
-    );
-    setFilteredSchedules((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, approved: !approved } : item
-      )
-    );
-    alert(`Booking ${!approved ? "approved" : "unapproved"} successfully.`);
-  } catch (error) {
-    console.error("Error updating approval:", error);
-    alert("Failed to update approval status.");
+    await deleteDoc(doc(db, "orders", localShopName, "items", orderId));
+    setOrders((prev) => prev.filter((order) => order.id !== orderId));
+  } catch (err) {
+    console.error("Error deleting order:", err);
+    setError("Failed to delete the order.");
   }
 };
 
-  return loading ? (
-    <Loader />
-  ) : (
-    <div id="main" className="border py-2 px-3 position-relative vh-100">
-      <div className="d-flex align-items-center justify-content-between">
-        <h6 className="text-white">
-          <span className="bg-white text-black px-2 py-2">
-            RESTAURENT <span className="text-decoration-underline ms-1">ORDERS</span>
-          </span>
-        </h6>
 
-        {/* Refresh Button */}
-        <button 
-          onClick={fetchSchedules}
-          style={{
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 1000,
-            background: "transparent",
-            border: "none",
-            color: "white",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
-        >
-          🔄 Refresh
-        </button>
-      </div>
+  const toggleExpand = (id) => {
+    setExpandedOrderIds((prev) =>
+      prev.includes(id) ? prev.filter((eid) => eid !== id) : [...prev, id]
+    );
+  };
 
-      {/* Search Input Field */}
-      <div className="mb-3 d-flex justify-content-center">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="🔍 Search by Email..."
-          value={searchEmail}
-          onChange={handleSearch}
-          style={{
-            width: "100%",
-            maxWidth: "400px",
-            padding: "12px 15px",
-            marginTop: "2%",
-            borderRadius: "25px",
-            border: "1px solid #ccc",
-            fontSize: "14px",
-            outline: "none",
-            transition: "all 0.3s ease-in-out",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-            backgroundColor: "#f8f9fa",
-            color: "#333",
-          }}
-          onFocus={(e) => (e.target.style.border = "1px solid #007bff")}
-          onBlur={(e) => (e.target.style.border = "1px solid #ccc")}
-        />
-      </div>
+  // Handle checkbox toggle for delivered status
+const handleDeliveredChange = async (orderId, currentDeliveredStatus) => {
+  const db = getFirestore();
+  const localUser = JSON.parse(localStorage.getItem("data"));
+  const localShopName = localUser?.shopName;
+  if (!localShopName) {
+    setError("Shop name not found in local storage.");
+    return;
+  }
 
-      <div className="overflow-auto h-100 pb-5">
-        {filteredSchedules.length > 0 ? (
-          <>
-            <table className="table table-dark table-striped text-center">
-         <thead>
-  <tr>
-    <th>Booking ID</th>
-    <th>Email</th>
-    <th>Service Name</th>
-    <th>Additional Service</th>
-    <th>Total Price</th>
-    <th>Booking Date</th>
-    <th>Booking Time</th>
-    <th>Approved</th> {/* NEW COLUMN */}
-    <th>Advance Payment</th>
-    <th>Actions</th>
-  </tr>
-</thead>
-
-             <tbody>
-  {currentRecords.map((schedule, index) => (
-    <tr key={schedule.id}>
-      <td>{indexOfFirstRecord + index + 1}</td>
-      <td>{schedule.email || "No Email"}</td>
-      <td>{schedule.serviceName || "No Service"}</td>
-      <td>{schedule.additionalService || "Not available"}</td>
-      <td>{schedule.totalPrice || "No Price"}</td>
-      <td>{schedule.bookingDate || "No Date"}</td>
-      <td>{schedule.bookingTime || "No Time"}</td>
-
-      {/* ✅ Approved Toggle */}
-      <td>
-        <input
-          type="checkbox"
-          checked={schedule.approved || false}
-          onChange={() =>
-            handleToggleApproval(schedule.id, schedule.approved || false)
+  // Update local state
+  setOrders((prevOrders) =>
+    prevOrders.map((order) =>
+      order.id === orderId
+        ? {
+            ...order,
+            status: {
+              ...order.status,
+              active: false,
+              delivered: !currentDeliveredStatus,
+            },
           }
-        />
-      </td>
-      <td>50%</td>
+        : order
+    )
+  );
 
-      <td>
-        <button
-          className="btn btn-danger"
-          onClick={() => handleCancelBooking(schedule)}
+  try {
+    const orderDocRef = doc(db, "orders", localShopName, "items", orderId);
+    await updateDoc(orderDocRef, {
+      status: {
+        active: true,
+        delivered: !currentDeliveredStatus,
+      },
+    });
+
+    // ✅ Send email only when changed to "delivered"
+    if (!currentDeliveredStatus) {
+      const updatedOrder = orders.find(order => order.id === orderId);
+      const response = await fetch("http://localhost:5000/send-delivery-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: updatedOrder.UserOrderedFrom,
+          name: updatedOrder.deliveryDetails?.name,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to send delivery email.");
+      }
+    }
+  } catch (err) {
+    console.error("Error updating order status:", err);
+    setError("Failed to update order status.");
+  }
+};
+
+
+  if (loading) return <p>Loading orders...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (!orders.length) return <p>No orders found for your shop.</p>;
+
+  return (
+    <div className="container">
+      <h2 className="title">
+        Orders for {JSON.parse(localStorage.getItem("data"))?.shopName || "Shop"}
+      </h2>
+
+      <div className="table-scroll-wrapper">
+        <table className="orders-table" role="table" aria-label="Orders Table">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Email</th>
+              <th scope="col">Payment</th>
+              <th scope="col">Total</th>
+              <th scope="col">Status</th>
+              <th scope="col">Is Delivered</th> {/* New column */}
+              <th scope="col">Date</th>
+              <th scope="col">Items</th>
+              <th scope="col">Address</th>
+              <th scope="col">Contact</th>
+              <th scope="col">Flat</th>
+              <th scope="col">Customer</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+        <tbody>
+  {orders.map((order) => {
+    const isExpanded = expandedOrderIds.includes(order.id);
+    // Check if delivered is false
+    const isDeliveredNo = order.status && order.status.delivered === false;
+
+    // Style for the entire row if delivered is No
+    const rowStyle = isDeliveredNo
+      ? { backgroundColor: "#a8e6a3", fontWeight: "700" }
+      : {};
+
+    return (
+      <React.Fragment key={order.id}>
+        <tr
+          className="order-row"
+          onClick={() => toggleExpand(order.id)}
+          title="Click to expand/collapse items"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") toggleExpand(order.id);
+          }}
+          style={rowStyle} // apply style to the whole row
         >
-          Cancel Booking
-        </button>
-      </td>
-    </tr>
-  ))}
+          <td style={rowStyle}>{order.id || "N/A"}</td>
+          <td style={rowStyle}>{order.UserOrderedFrom || "N/A"}</td>
+          <td style={rowStyle}>{order.deliveryDetails?.paymentMethod || "N/A"}</td>
+          <td style={{ ...rowStyle, textAlign: "right" }}>{order.total || "N/A"}</td>
+          <td style={rowStyle}>
+            {order.status ? (
+              <>Delivered: {order.status.delivered ? "Yes" : "No"}</>
+            ) : (
+              "No status"
+            )}
+          </td>
+
+          <td style={rowStyle}>
+            <input
+              type="checkbox"
+              checked={order.status?.delivered || false}
+              onChange={() =>
+                handleDeliveredChange(order.id, order.status?.delivered || false)
+              }
+              onClick={(e) => e.stopPropagation()} // Prevent row expand on click checkbox
+              aria-label={`Mark order ${order.id} as delivered`}
+            />
+          </td>
+          <td style={rowStyle}>
+            {order.createdAt?.toDate
+              ? order.createdAt.toDate().toLocaleString()
+              : "N/A"}
+          </td>
+          <td style={{ ...rowStyle, textAlign: "center" }}>
+            {order.items?.length || 0}
+          </td>
+          <td style={rowStyle}>{order.deliveryDetails?.address || "N/A"}</td>
+          <td style={rowStyle}>{order.deliveryDetails?.contact || "N/A"}</td>
+          <td style={rowStyle}>{order.deliveryDetails?.flat || "N/A"}</td>
+          <td style={rowStyle}>{order.deliveryDetails?.name || "N/A"}</td>
+          <td style={rowStyle}>
+  <button
+    onClick={(e) => {
+      e.stopPropagation(); // prevent row toggle
+      handleDeleteOrder(order.id);
+    }}
+    style={{ background: "#dc2626", color: "white", border: "none", padding: "6px 12px", cursor: "pointer", borderRadius: "4px" }}
+  >
+    X
+  </button>
+</td>
+
+        </tr>
+
+        {isExpanded && order.items && (
+          <tr className="items-row">
+            <td colSpan="12">
+              <div className="items-table-wrapper">
+                <table className="items-table" role="table" aria-label="Order Items">
+                  <thead>
+                    <tr>
+                      <th scope="col">Service Name</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Price (PKR)</th>
+                      <th scope="col">Quantity</th>
+                      <th scope="col">Payment Option</th>
+                      <th scope="col">Image</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.items.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>{item.ServiceName || "N/A"}</td>
+                        <td>{item.Category || "N/A"}</td>
+                        <td title={item.Description}>{item.Description || "N/A"}</td>
+                        <td className="right-align">{item.Price || "N/A"}</td>
+                        <td className="center-align">{item.quantity || "N/A"}</td>
+                        <td>{order.deliveryDetails?.paymentMethod || "N/A"}</td>
+                        <td>
+                          {item.ServiceImage ? (
+                            <img
+                              src={item.ServiceImage}
+                              alt={item.ServiceName}
+                              className="item-image"
+                            />
+                          ) : (
+                            "No image"
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        )}
+      </React.Fragment>
+    );
+  })}
 </tbody>
 
-            </table>
-
-            {/* Pagination Controls */}
-            <div className="d-flex justify-content-center mt-3">
-              <button
-                className="btn btn-light me-2"
-                onClick={() => setCurrentPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span className="text-white align-self-center">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="btn btn-light ms-2"
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className="text-white text-center mt-3">No bookings found.</p>
-        )}
+        </table>
       </div>
+
+      
+      <style jsx>{`
+        .container {
+          max-width: 1200px;
+          margin: 40px auto;
+          padding: 0 15px;
+          font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+          color: #333;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+        }
+        .title {
+          font-size: 1.8rem;
+          margin-bottom: 20px;
+          text-align: center;
+          font-weight: 700;
+          color: #222;
+          user-select: none;
+          flex-shrink: 0;
+        }
+        .table-scroll-wrapper {
+          flex-grow: 1;
+          overflow-y: auto;
+          overflow-x: auto;
+          border-radius: 8px;
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+          background-color: #fff;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          min-width: 1900px;
+          table-layout: fixed;
+        }
+        thead tr {
+          background-color: #1e3a8a; /* Indigo-900 */
+          color: #fff;
+          user-select: none;
+          position: sticky;
+          top: 0;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+          z-index: 2;
+        }
+        th,
+        td {
+          padding: 12px 16px;
+          border: 1px solid #ddd;
+          text-align: left;
+          vertical-align: middle;
+          overflow-wrap: break-word;
+          word-break: break-word;
+        }
+        th {
+          font-weight: 600;
+          font-size: 0.9rem;
+          letter-spacing: 0.03em;
+        }
+        .order-row {
+          cursor: pointer;
+          transition: background-color 0.25s ease;
+        }
+        .order-row:hover,
+        .order-row:focus {
+          background-color: #f3f4f6; /* Light gray */
+          outline: none;
+        }
+        .items-row td {
+          background-color: #f9fafb;
+          padding: 0;
+          border: none;
+        }
+        .items-table-wrapper {
+          padding: 15px 20px;
+          overflow-x: auto;
+        }
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 700px;
+          table-layout: fixed;
+        }
+        .items-table th,
+        .items-table td {
+          padding: 10px 12px;
+          border: 1px solid #ddd;
+          font-size: 0.9rem;
+          word-break: break-word;
+        }
+        .items-table th {
+          background-color: #2563eb; /* Blue-600 */
+          color: #fff;
+          font-weight: 600;
+        }
+        .right-align {
+          text-align: right;
+          font-variant-numeric: tabular-nums;
+        }
+        .center-align {
+          text-align: center;
+        }
+        .item-image {
+          width: 50px;
+          height: 50px;
+          object-fit: cover;
+          border-radius: 4px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+          .container {
+            max-width: 100%;
+            padding: 0 10px;
+          }
+          table {
+            min-width: 800px;
+          }
+          .items-table {
+            min-width: 600px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .title {
+            font-size: 1.4rem;
+          }
+          table {
+            min-width: 1900px;
+            font-size: 0.85rem;
+          }
+          .items-table {
+            min-width: 600px;
+            font-size: 0.8rem;
+          }
+          th,
+          td {
+            padding: 8px 10px;
+          }
+          .item-image {
+            width: 40px;
+            height: 40px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .title {
+            font-size: 1.2rem;
+          }
+          table {
+            min-width: 1500px;
+            font-size: 0.75rem;
+          }
+          .items-table {
+            min-width: 550px;
+            font-size: 0.7rem;
+          }
+          th,
+          td {
+            padding: 6px 8px;
+          }
+          .item-image {
+            width: 35px;
+            height: 35px;
+          }
+          /* For mobile: add some bottom padding to rows */
+          .order-row {
+            line-height: 1.2;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default ProfessionalSchedule;
+export default OrdersComponent;

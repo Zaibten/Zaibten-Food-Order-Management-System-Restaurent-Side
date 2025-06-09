@@ -7,23 +7,23 @@ const About = () => {
       {/* Who We Are Section */}
       <div className="container section">
         <h3 className="text-center animate-header hotpink-text">
-          <span className="highlight-border">WHO WE ARE ?</span>
+          <span className="highlight-border">Who We Are ?</span>
         </h3>
         <div className="row align-items-center mt-4">
           <div className="col-12 col-sm-6 animate-fade">
-            <p className="about-text">
-              Welcome to{" "}
-              <strong className="hotpink-text">Glam The Girl</strong>, your
-              one-stop-shop for finding the perfect hair salon near you! Our
-              mission is to connect you with the best hair salons in your area
-              and make booking an appointment a breeze. Thank you for choosing{" "}
-              <strong className="hotpink-text">Glam The Girl!</strong>
-            </p>
+           <p className="about-text">
+  Welcome to <strong className="hotpink-text">Food Planet</strong>, your
+  go-to destination for ordering delicious food from your favorite restaurants!
+  Our mission is to connect you with the best eateries in your area and make
+  ordering your next meal quick and easy. Thank you for choosing{" "}
+  <strong className="hotpink-text">Food Planet!</strong>
+</p>
+
           </div>
           <div className="col-12 col-sm-6 animate-zoom">
             <img
-              src="https://img.freepik.com/free-vector/barber-concept-illustration_114360-1872.jpg?w=740&t=st=1685893273~exp=1685893873~hmac=7bd13055e19a9431d2ae316b1846b1f22943640ce382f91136230238423be00a"
-              alt="salon"
+              src="https://media.istockphoto.com/id/1446478827/photo/a-chef-is-cooking-in-his-restaurants-kitchen.jpg?s=612x612&w=0&k=20&c=jwKJmGErrLe2XsTWNYEEyiNicudYVA4j8jvnTiJdp58="
+              alt="RESTAURENT"
               className="w-100 rounded-shadow"
             />
           </div>
@@ -51,12 +51,12 @@ const About = () => {
       {/* Testimonials Section */}
       <div className="testimonial-section section">
         <h3 className="text-center hotpink-text animate-header">
-          WHAT OUR CLIENTS SAY
+          What Our Clients Say
         </h3>
         <div className="testimonial-container">
           <div className="testimonial-card animate-fade">
             <p>
-              "I love how easy it is to find salons through Glam The Girl!
+              "I love how easy it is to find RESTAURENTS through Food Planet!
               Their platform is user-friendly and always up-to-date."
             </p>
             <h5>- Sarah J.</h5>
@@ -64,14 +64,14 @@ const About = () => {
           <div className="testimonial-card animate-fade-up">
             <p>
               "The best experience ever! The reviews helped me choose the
-              perfect salon for my makeover."
+              perfect RESTAURENT for my makeover."
             </p>
             <h5>- Emily R.</h5>
           </div>
           <div className="testimonial-card animate-fade">
             <p>
-              "I can’t imagine going back to the old ways of finding salons.
-              Glam The Girl makes everything so convenient!"
+              "I can’t imagine going back to the old ways of finding RESTAURENTS.
+              Food Planet makes everything so convenient!"
             </p>
             <h5>- Olivia P.</h5>
           </div>
@@ -80,11 +80,11 @@ const About = () => {
 
       {/* Our Mission Section */}
       <div className="container section animate-fade-up">
-        <h3 className="text-center hotpink-text">OUR MISSION</h3>
+        <h3 className="text-center hotpink-text">Our Mission</h3>
         <p className="text-center mission-text">
-          At Glam The Girl, our mission is to empower individuals to express
+          At Food Planet, our mission is to empower individuals to express
           themselves through their style. We aim to bridge the gap between
-          clients and top-notch salons, ensuring every experience is a memorable
+          clients and top-notch RESTAURENTS, ensuring every experience is a memorable
           one. Whether it’s a quick trim or a complete transformation, we are
           here to make it happen.
         </p>

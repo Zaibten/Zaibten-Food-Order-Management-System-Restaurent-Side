@@ -2,58 +2,56 @@ import React, { useState } from "react";
 import { ProfessionalSignIn, ProfessionalSignUp } from "../../Auth/auth";
 import { message } from "antd";
 import { useSelector } from "react-redux";
+// import LoginPage from "../Loginpage/Loginpage";
 
 const BarberRegister = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const isUser = useSelector((state) => state.isUser.isUser);
-
-  const sendMessage = (messageText, variant) => {
+  // console.log(isUser);
+  const sendMessage = (messageText, varient) => {
     messageApi.open({
-      type: variant,
+      type: varient,
       content: messageText,
     });
   };
-
   const [value, setValue] = useState({
-    email: "luckybroast@gmail.com",
-    password: "12345678",
-  });
+    //State for login
 
+    email: "sudo@admin.in",
+    password: "sudo@admin.in",
+  });
   const [regValue, setRegValue] = useState({
+    //State for Registration
     username: "",
     number: "",
     email: "",
     password: "",
   });
 
-  // Modal visibility state
-  const [showModal, setShowModal] = useState(true);
-
-  // Tab state: "login" or "register"
-  const [activeTab, setActiveTab] = useState("login");
-
   const onChangeRegister = (e) => {
-    const { name, value } = e.target;
-    setRegValue((prev) => ({ ...prev, [name]: value }));
+    const name = e.target.name; //Function for Register Section
+    const value = e.target.value;
+    setRegValue((data) => ({ ...data, [name]: value }));
+    // console.log(regValue);
   };
-
   const onChangeSigin = (e) => {
-    const { name, value } = e.target;
-    setValue((prev) => ({ ...prev, [name]: value }));
+    const name = e.target.name; //Function for Sigin Section
+    const value = e.target.value;
+    setValue((data) => {
+      return { ...data, [name]: value };
+    });
   };
 
   const onSubmitRegister = async (e) => {
     e.preventDefault();
-    if (
-      !regValue.username ||
-      !regValue.email ||
-      !regValue.number ||
-      !regValue.password
-    ) {
+
+    if (regValue === "") {
       alert("Enter SignUp Details");
       return;
     }
-    sendMessage("Preparing Professional View!!", "warning");
+    let varient = "warning";
+    let messageText = "Preparing Professional View!!";
+    sendMessage(messageText, varient);
     await ProfessionalSignUp(regValue, sendMessage, isUser);
     setRegValue({
       username: "",
@@ -62,21 +60,22 @@ const BarberRegister = () => {
       password: "",
     });
   };
-
   const OnSubmitLogin = async (e) => {
     e.preventDefault();
     if (isUser === true) {
-      sendMessage(
-        "Want to Switch your Account to Profesional Kindly visit User Profile !!!",
-        "warning"
-      );
+      let varient = "warning";
+      let messageText =
+        "Want to Switch your Account to Profesional Kindly visit User Profile !!!";
+      sendMessage(messageText, varient);
       return;
     }
-    if (!value.email || !value.password) {
+    if (value === "") {
       alert("Enter Login Details");
       return;
     }
-    sendMessage("One moment please!!", "warning");
+    let varient = "warning";
+    let messageText = "Hold On Dude!!";
+    sendMessage(messageText, varient);
     await ProfessionalSignIn(value, sendMessage);
     setValue({
       email: "",
@@ -84,322 +83,190 @@ const BarberRegister = () => {
     });
   };
 
-  const closeModal = () => {
-    setShowModal(false);
-  };
-
-  if (!showModal) return null;
-
   return (
-    <>
+    <div>
       {contextHolder}
-      <style>{`
-        /* Your existing styles here, unchanged */
-        * {
-          box-sizing: border-box;
-        }
-        body {
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-            Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-          background: #fff0f5;
-          color: #222;
-        }
-        .modal-content {
-          background-color: #fff0f5 !important;
-          border-radius: 20px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-          max-width: 600px;
-          margin: 1rem auto;
-          padding: 1.5rem;
-        }
-        .modal-header {
-          border-bottom: none;
-          padding-bottom: 0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .modal-title span {
-          border: 2px solid #ff69b4;
-          border-radius: 10px;
-          padding: 0.4rem 1rem;
-          background-color: #ffe0ec;
-          font-weight: 600;
-          font-size: 1.3rem;
-        }
-        .modal-title span span {
-          background-color: #ff69b4;
-          color: white;
-          border-radius: 5px;
-          padding: 0.4rem 0.7rem;
-          margin-left: 0.5rem;
-          font-weight: 700;
-        }
-        .btn-close {
-          background: none;
-          border: none;
-          font-size: 1.5rem;
-          cursor: pointer;
-          color: #444;
-        }
-        .nav-pills {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 1rem;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-        .nav-pills a {
-          padding: 0.5rem 1.5rem;
-          border-radius: 25px;
-          border: 2px solid #ff69b4;
-          color: #ff69b4;
-          text-decoration: none;
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          display: inline-block;
-          user-select: none;
-        }
-        .nav-pills a.active {
-          background-color: #ff69b4;
-          color: white;
-        }
-        .tab-content {
-          padding: 0 1rem;
-        }
-        form {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        input.form-control {
-          padding: 0.8rem 1rem;
-          border-radius: 10px;
-          border: 1.5px solid #ff69b4;
-          font-size: 1rem;
-          outline-offset: 2px;
-          transition: border-color 0.3s ease;
-        }
-        input.form-control:focus {
-          border-color: #ff1493;
-          outline: none;
-          box-shadow: 0 0 6px #ff69b4;
-        }
-        .form-check {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.9rem;
-          color: #555;
-        }
-        .form-check-input {
-          margin-right: 0.5rem;
-          width: 1.2rem;
-          height: 1.2rem;
-          cursor: pointer;
-          border-radius: 5px;
-          border: 1.5px solid #ff69b4;
-          transition: background-color 0.3s ease;
-        }
-        .form-check-input:checked {
-          background-color: #ff69b4;
-          border-color: #ff69b4;
-        }
-        button.btn {
-          background-color: #ff69b4;
-          color: white;
-          border: none;
-          padding: 0.85rem 0;
-          border-radius: 10px;
-          font-size: 1.1rem;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-        }
-        button.btn:hover {
-          background-color: #ff1493;
-        }
-        @media (max-width: 480px) {
-          .modal-content {
-            margin: 1rem 0.5rem;
-            padding: 1rem;
-          }
-          .nav-pills a {
-            padding: 0.4rem 1rem;
-            font-size: 0.9rem;
-          }
-          button.btn {
-            font-size: 1rem;
-          }
-        }
-        /* Modal background overlay */
-        .modal-overlay {
-          position: fixed;
-          top: 0; left: 0;
-          width: 100vw; height: 100vh;
-          background-color: rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1050;
-        }
-      `}</style>
+      <div
+        className="modal fade"
+        id="exampleModal"
+        tabIndex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered modal-lg ">
+          <div className="modal-content rounded-0 border bg-black text-white">
+            <div className="modal-header border-0 position-relative">
+              <h5 className="modal-title" id="exampleModalLabel">
+                <span className="border text-white py-2 ps-3">
+                  Professional{" "}
+                  <span className="py-2 pe-3 bg-white text-black">Login</span>
+                </span>
+              </h5>
+              <button
+                type="button"
+                className="text-white btn-close"
+                data-mdb-dismiss="modal"
+                aria-label="Close"
+              >
+                <span className="material-icons-outlined">close</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <ul
+                className="nav nav-pills nav-justified mb-3"
+                id="ex1"
+                role="tablist"
+              >
+                <li className="nav-item" role="presentation">
+                  <a
+                    className="nav-link rounded-0 text-black"
+                    id="tab-login"
+                    data-mdb-toggle="pill"
+                    href="#pills-login"
+                    role="tab"
+                    aria-controls="pills-login"
+                    aria-selected="false"
+                  >
+                    Login
+                  </a>
+                </li>
+                <li className="nav-item" role="presentation">
+                  <a
+                    className="nav-link active rounded-0 text-black"
+                    id="tab-register"
+                    data-mdb-toggle="pill"
+                    href="#pills-register"
+                    role="tab"
+                    aria-controls="pills-register"
+                    aria-selected="true"
+                  >
+                    Register
+                  </a>
+                </li>
+              </ul>
 
-<div className="modal-overlay" role="dialog" aria-modal="true">
-        <div
-          className="modal-content text-black"
-          onClick={(e) => e.stopPropagation()} // Prevent modal close on content click
-        >
-          <div className="modal-header position-relative">
-            <h5 className="modal-title" id="exampleModalLabel">
-              <span>
-                Professional <span>{activeTab === "login" ? "Login" : "Register"}</span>
-              </span>
-            </h5>
-            <button
-              type="button"
-              className="btn-close"
-              aria-label="Close"
-              onClick={closeModal}
-            >
-              <span className="material-icons-outlined">close</span>
-            </button>
-          </div>
-          <br></br>
-
-          <div className="modal-body">
-            {/* Tabs */}
-            <ul className="nav nav-pills nav-justified mb-4" role="tablist">
-              <li className="nav-item" role="presentation">
-                <a
-                  className={`nav-link rounded-pill ${activeTab === "login" ? "active" : ""}`}
-                  href="#"
-                  role="tab"
-                  aria-selected={activeTab === "login"}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("login");
-                  }}
+              <div className="tab-content">
+                <div
+                  className="tab-pane fade "
+                  id="pills-login"
+                  role="tabpanel"
+                  aria-labelledby="tab-login"
                 >
-                  Login
-                </a>
-              </li>
-              <li className="nav-item" role="presentation">
-                <a
-                  className={`nav-link rounded-pill ${activeTab === "register" ? "active" : ""}`}
-                  href="#"
-                  role="tab"
-                  aria-selected={activeTab === "register"}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("register");
-                  }}
-                >
-                  Register
-                </a>
-              </li>
-            </ul>
-
-            {/* Tab Content */}
-            <div className="tab-content">
-              {activeTab === "login" && (
-                <div className="tab-pane fade show active" role="tabpanel">
                   <form onSubmit={OnSubmitLogin}>
                     <input
                       type="email"
-                      placeholder="Email"
-                      className="form-control"
-                      value={value.email}
-                      name="email"
-                      onChange={onChangeSigin}
-                      autoComplete="email"
+                      id="loginName"
                       required
+                      value={value.email}
+                      onChange={onChangeSigin}
+                      name="email"
+                      placeholder="Enter Email"
+                      className="form-control bg-black text-white"
                     />
+
                     <input
                       type="password"
-                      placeholder="Password"
-                      className="form-control"
                       value={value.password}
-                      name="password"
+                      placeholder="Enter Password"
+                      id="loginPassword"
                       onChange={onChangeSigin}
-                      autoComplete="current-password"
+                      name="password"
                       required
+                      className="form-control text-white bg-black mt-4"
                     />
-                    <div className="form-check mt-3">
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        id="rememberMe"
-                      />
-                      <label className="form-check-label" htmlFor="rememberMe">
-                        Remember me
-                      </label>
+                    <div className="row mb-4">
+                      <div className="col-md-12 mt-2 d-flex justify-content-center">
+                        <a href="#!">Forgot password?</a>
+                      </div>
                     </div>
+
                     <button
-                      className="btn mt-3"
                       type="submit"
-                      disabled={!value.email || !value.password}
+                      className="btn btn-warning btn-block mb-4"
+                      data-mdb-dismiss="modal"
                     >
                       Login
-                    </button>
+                    </button> 
                   </form>
                 </div>
-              )}
-
-              {activeTab === "register" && (
-                <div className="tab-pane fade show active" role="tabpanel">
+                <div
+                  className="tab-pane fade show active"
+                  id="pills-register"
+                  role="tabpanel"
+                  aria-labelledby="tab-register"
+                >
                   <form onSubmit={onSubmitRegister}>
                     <input
                       type="text"
-                      className="form-control"
-                      placeholder="User Name"
+                      id="registerName"
                       name="username"
                       value={regValue.username}
                       onChange={onChangeRegister}
-                      required
+                      placeholder="Enter Name"
+                      className="form-control border bg-black mt-3 text-white"
                     />
+
+                    <input
+                      placeholder="Enter Number"
+                      value={regValue.number}
+                      type="number"
+                      name="number"
+                      onChange={onChangeRegister}
+                      id="registerUsername"
+                      className="form-control border bg-black mt-3 text-white"
+                    />
+
                     <input
                       type="email"
-                      className="form-control"
-                      placeholder="Email"
-                      name="email"
+                      placeholder="Enter Email"
                       value={regValue.email}
+                      name="email"
                       onChange={onChangeRegister}
-                      required
+                      id="registerEmail"
+                      className="form-control border bg-black mt-3 text-white"
                     />
-                    <input
-                      type="tel"
-                      className="form-control"
-                      placeholder="Mobile Number"
-                      name="number"
-                      value={regValue.number}
-                      onChange={onChangeRegister}
-                      required
-                      pattern="[0-9]{10,15}"
-                      title="Enter valid mobile number"
-                    />
+
                     <input
                       type="password"
-                      className="form-control"
-                      placeholder="Password"
                       name="password"
                       value={regValue.password}
                       onChange={onChangeRegister}
-                      required
-                      minLength={8}
+                      placeholder="Enter Password"
+                      id="registerPassword"
+                      className="form-control border bg-black mt-3 text-white"
                     />
-                    <button className="btn" type="submit">
+
+                    <div className="form-check d-flex justify-content-center mb-4 mt-2">
+                      <input
+                        className="form-check-input me-2"
+                        type="checkbox"
+                        value=""
+                        id="registerCheck"
+                        defaultChecked
+                        aria-describedby="registerCheckHelpText"
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="registerCheck"
+                      >
+                        I have read and agree to the terms
+                      </label>
+                    </div>
+                    <button
+                      type="submit"
+                      className="btn btn-warning btn-block mb-3"
+                      data-mdb-dismiss="modal"
+                    >
                       Register
                     </button>
                   </form>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

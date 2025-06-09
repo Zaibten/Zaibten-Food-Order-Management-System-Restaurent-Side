@@ -15,38 +15,39 @@ const Footer = () => {
       <div className="footer-content">
         <div className="footer-logo-section">
           <div className="footer-logo">
-            <img src={logo} alt="Glam The Girl Logo" />
+            <img src={logo} alt="Food Planet Logo" />
           </div>
           <p>
-            <strong>Glam The Girl</strong> is a premium Glam The Girl that redefines elegance with unmatched services in hairstyling, makeup, and skincare. Experience luxury, expertise, and personalized care in every visit.
-          </p>
+  <strong>Food Planet</strong> is a premium food delivery platform that redefines convenience by bringing your favorite meals from top restaurants right to your doorstep. Experience variety, speed, and satisfaction with every order.
+</p>
+
         </div>
         <div className="footer-gallery">
           <h3>Our Gallery</h3>
           <div className="gallery-grid">
             <div className="gallery-item">
-              <img src={galleryImage1} alt="Salon Experience 1" />
+              <img src={galleryImage1} alt="RESTAURENT Experience 1" />
             </div>
             <div className="gallery-item">
-              <img src={galleryImage2} alt="Salon Experience 2" />
+              <img src={galleryImage2} alt="RESTAURENT Experience 2" />
             </div>
             <div className="gallery-item">
-              <img src={galleryImage3} alt="Salon Experience 3" />
+              <img src={galleryImage3} alt="RESTAURENT Experience 3" />
             </div>
             <div className="gallery-item">
-              <img src={galleryImage4} alt="Salon Experience 4" />
+              <img src={galleryImage4} alt="RESTAURENT Experience 4" />
             </div>
             <div className="gallery-item">
-              <img src={galleryImage5} alt="Salon Experience 5" />
+              <img src={galleryImage5} alt="RESTAURENT Experience 5" />
             </div>
             <div className="gallery-item">
-              <img src={galleryImage6} alt="Salon Experience 6" />
+              <img src={galleryImage6} alt="RESTAURENT Experience 6" />
             </div>
           </div>
         </div>
         <div className="footer-social">
   <h3>Follow Us</h3>
-  <p>Stay connected with us on social media for the latest updates, offers, and beauty tips. Join our community of beauty enthusiasts!</p>
+<p>Stay connected with us on social media for the latest updates, exclusive offers, and mouth-watering food deals. Join our community of food lovers!</p>
   <div className="social-icons">
     <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><i className="fab fa-twitter"></i></a>
     <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><i className="fab fa-facebook-f"></i></a>
@@ -56,14 +57,14 @@ const Footer = () => {
     <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><i className="fab fa-youtube"></i></a>
   </div>
   <div className="footer-community">
-    <p><strong>Trending Hashtags:</strong> #GlamTheGirl #BeautyRedefined #SalonExperience</p>
+    <p><strong>Trending Hashtags:</strong> #FoodPlanet #FreshToFork #FlavorOnTheGo #FoodieFavorites</p>
     <p>Subscribe to our newsletter for exclusive updates and offers!</p>
   </div>
 </div>
 
       </div>
       <div className="footer-bottom">
-        <p>© 2024 Glam The Girl. All rights reserved. Designed with ❤️ for beauty enthusiasts.</p>
+<p>© 2025 Food Planet. All rights reserved. Designed with ❤️ for food lovers everywhere.</p>
       </div>
     </footer>
   );
