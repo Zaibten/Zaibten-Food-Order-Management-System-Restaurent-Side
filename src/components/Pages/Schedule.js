@@ -111,19 +111,37 @@ const Schedule = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this booking?")) {
-      try {
-        const bookingRef = doc(db, "Bookings", id);
-        await deleteDoc(bookingRef);
-        setBookings((prev) => prev.filter((booking) => booking.id !== id));
-        alert("Booking deleted successfully.");
-      } catch (error) {
-        console.error("Error deleting booking:", error);
-        alert("Failed to delete booking. Please try again.");
-      }
+const handleDelete = async (id) => {
+  if (window.confirm("Are you sure you want to delete this booking?")) {
+    try {
+      // Find the deleted booking data
+      const deletedBooking = bookings.find(b => b.id === id);
+
+      const bookingRef = doc(db, "Bookings", id);
+      await deleteDoc(bookingRef);
+      setBookings((prev) => prev.filter((booking) => booking.id !== id));
+
+      // Send email notification
+      await fetch("https://foodserver-eta.vercel.app/send-deletion-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toEmail: deletedBooking.email,
+          serviceName: deletedBooking.serviceName,
+          bookingDate: deletedBooking.bookingDate,
+          bookingTime: deletedBooking.bookingTime,
+          totalPrice: deletedBooking.totalPrice,
+        }),
+      });
+
+      alert("Booking deleted and email sent successfully.");
+    } catch (error) {
+      console.error("Error deleting booking or sending email:", error);
+      alert("Failed to delete booking or send email.");
     }
-  };
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -83,7 +83,7 @@ const BookShop = () => {
 
       alert("Your booking has been saved successfully!");
 
-      await fetch("http://localhost:5000/send-booking-email", {
+      await fetch("https://foodserver-eta.vercel.app/send-booking-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
