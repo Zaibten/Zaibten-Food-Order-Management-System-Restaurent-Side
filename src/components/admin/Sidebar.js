@@ -80,6 +80,16 @@ const Sidebar = () => {
     <span className="material-icons-outlined me-2">calendar_month</span>
     <span id="sidebarMenuName">My Orders</span>
   </Link>
+  <Link
+  to={"tablebooking"}
+  id="SideBtn"
+  className="py-2 my-4 ps-2 d-flex align-items-center text-white"
+  style={{ backgroundColor: "#ff69b4" }}
+>
+  <span className="material-icons-outlined me-2">receipt_long</span>
+  <span id="sidebarMenuName">Order Bookings</span>
+</Link>
+
 </div>
 
       <div id="footer">

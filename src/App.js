@@ -20,6 +20,7 @@ import ProfessionalSchedule from "./components/admin/nestedRoutes/ProfessionalSc
 import { useSelector } from "react-redux";
 import Recommendation from "./components/Recommandations/Recommendation";
 
+import Table from "./components/admin/nestedRoutes/Table";
 import Master from "./components/admin/nestedRoutes/MasterClass";
 import Artist from "./components/admin/nestedRoutes/ArtistPortfolio";
 
@@ -87,6 +88,7 @@ function App() {
           <Route path="saloonart" element={<Artist />} />
           
           <Route path="masterclass" element={<Master />} />
+          <Route path="tablebooking" element={<Table />} />
           
           <Route path="add-services" element={<AddShopDetails />} />
           <Route
