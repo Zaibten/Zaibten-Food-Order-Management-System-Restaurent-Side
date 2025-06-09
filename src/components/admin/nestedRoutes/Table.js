@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../Firebase/firebase";
 import Loader from "../../Loader/loader";
 
@@ -8,59 +16,99 @@ const TableBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-      // 1. Get user email or name from localStorage
-      const localData = JSON.parse(localStorage.getItem("data")); // Change this key appropriately
-      const userEmail = localData?.email || null;
-      const userName = localData?.name || null;
+        const localData = JSON.parse(localStorage.getItem("data"));
+        const userEmail = localData?.email || null;
+        const userName = localData?.name || null;
 
-      if (!userEmail && !userName) {
-        console.error("Email or Name not found in localStorage");
-        return;
+        if (!userEmail && !userName) {
+          console.error("Email or Name not found in localStorage");
+          return;
+        }
+
+        const professionalsRef = collection(db, "ProfessionalDB");
+        const q = query(
+          professionalsRef,
+          where(userEmail ? "email" : "name", "==", userEmail || userName)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          console.error("No matching restaurant found for this user.");
+          return;
+        }
+
+        const professionalDoc = querySnapshot.docs[0];
+        const restaurantId = professionalDoc.id;
+        const restaurant = professionalDoc.data();
+        setRestaurantData(restaurant);
+
+        const bookingsRef = collection(db, "tableBookings");
+        const bookingsQuery = query(
+          bookingsRef,
+          where("restaurantId", "==", restaurantId)
+        );
+        const bookingsSnapshot = await getDocs(bookingsQuery);
+
+        const bookingsData = bookingsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setBookings(bookingsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // 2. Query ProfessionalDB based on email or name
-      const professionalsRef = collection(db, "ProfessionalDB");
-      const q = query(
-        professionalsRef,
-        where(userEmail ? "email" : "name", "==", userEmail || userName)
-      );
-      const querySnapshot = await getDocs(q);
+    fetchData();
+  }, []);
 
-      if (querySnapshot.empty) {
-        console.error("No matching restaurant found for this user.");
-        return;
-      }
+  // Handle checkbox toggle
+const handleConfirmChange = async (bookingId, checked, booking) => {
+  try {
+    // Update in Firestore
+    const bookingDocRef = doc(db, "tableBookings", bookingId);
+    await updateDoc(bookingDocRef, {
+      Confirm: checked ? "Confirmed" : "Not Confirmed Yet",
+    });
 
-      const professionalDoc = querySnapshot.docs[0];
-      const restaurantId = professionalDoc.id;
-      const restaurant = professionalDoc.data();
-      setRestaurantData(restaurant);
+    // Update local state
+    setBookings((prev) =>
+      prev.map((b) =>
+        b.id === bookingId ? { ...b, Confirm: checked ? "Confirmed" : "Not Confirmed Yet" } : b
+      )
+    );
 
-      // 3. Fetch bookings for this restaurant ID
-      const bookingsRef = collection(db, "tableBookings");
-      const bookingsQuery = query(bookingsRef, where("restaurantId", "==", restaurantId));
-      const bookingsSnapshot = await getDocs(bookingsQuery);
-
-      const bookingsData = bookingsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setBookings(bookingsData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
+    // If confirmed, call API to send email
+    if (checked) {
+      // Send booking info to API
+      await fetch("http://localhost:5000/send-confirmtablebooking-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          restaurantEmail: restaurantData?.email,
+          restaurantName: restaurantData?.name,
+          userName: booking.userName,
+          userEmail: booking.userEmail,
+          bookingDate: booking.bookingDate,
+          bookingTime: booking.bookingTime,
+          numberOfGuests: booking.numberOfGuests,
+        }),
+      });
     }
-  };
-
-  fetchData();
-}, []);
+  } catch (error) {
+    console.error("Error updating confirmation status or sending email:", error);
+  }
+};
 
 
   if (loading) return <Loader />;
@@ -79,7 +127,8 @@ useEffect(() => {
                 <th>Guests</th>
                 <th>User Name</th>
                 <th>User Email</th>
-                <th>Is Comfirmed</th>
+                <th>Is Confirmed</th>
+                <th>Confirm Now</th> {/* New column */}
               </tr>
             </thead>
             <tbody>
@@ -92,21 +141,26 @@ useEffect(() => {
                   <td>{booking.userName}</td>
                   <td>{booking.userEmail}</td>
                   <td
-  className={
-    booking.Confirm &&
-    booking.Confirm.trim().toLowerCase() === "not confirmed yet"
-      ? "bg-danger text-white"
-      : booking.Confirm &&
-        booking.Confirm.trim().toLowerCase() === "confirmed"
-      ? "bg-success text-white"
-      : "" // no color or add your default class here
-  }
->
-  {booking.Confirm}
-</td>
+                    className={
+                      booking.Confirm &&
+                      booking.Confirm.trim().toLowerCase() === "not confirmed yet"
+                        ? "bg-danger text-white"
+                        : booking.Confirm &&
+                          booking.Confirm.trim().toLowerCase() === "confirmed"
+                        ? "bg-success text-white"
+                        : ""
+                    }
+                  >
+                    {booking.Confirm}
+                  </td>
+                  <td>
+                    <input
+  type="checkbox"
+  checked={booking.Confirm?.toLowerCase() === "confirmed"}
+  onChange={(e) => handleConfirmChange(booking.id, e.target.checked, booking)}
+/>
 
-
-
+                  </td>
                 </tr>
               ))}
             </tbody>
