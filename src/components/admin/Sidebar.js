@@ -40,7 +40,7 @@ const Sidebar = () => {
   return (
     <div
       style={{
-        background: "linear-gradient(to bottom, #fff, #ffe5f0)",
+        background: "linear-gradient(to bottom, #fff, #fff4e6)",
         height: "100vh",
         width: "250px",
         display: "flex",
@@ -53,6 +53,7 @@ const Sidebar = () => {
       }}
     >
       {context}
+
       {/* Profile Image */}
       <div>
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
@@ -63,76 +64,36 @@ const Sidebar = () => {
               width: "80px",
               height: "80px",
               borderRadius: "50%",
-              border: "3px solid #ff69b4",
+              border: "3px solid #ff7e00",
               transition: "transform 0.3s",
             }}
           />
         </div>
 
         {/* Sidebar Links */}
-       <Link
-          to={"/dashboard"}
-          id="SideBtn"
-          className="py-2 my-3 ps-3 d-flex align-items-center text-white active"
-          style={{
-            backgroundColor: "#ff69b4",
-            borderRadius: "12px",
-            transition: "transform 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-        >
-          <span className="material-icons-outlined me-2">person</span>
-          <span id="sidebarMenuName">Profile Page</span>
-        </Link>
-
-        <Link
-          to={"add-services"}
-          id="SideBtn"
-          className="py-2 my-3 ps-3 d-flex align-items-center text-white"
-          style={{
-            backgroundColor: "#ff69b4",
-            borderRadius: "12px",
-            transition: "transform 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-        >
-          <span className="material-icons-outlined me-2">design_services</span>
-          <span id="sidebarMenuName">Add Menu</span>
-        </Link>
-
-        <Link
-          to={"schedules-professional"}
-          id="SideBtn"
-          className="py-2 my-3 ps-3 d-flex align-items-center text-white"
-          style={{
-            backgroundColor: "#ff69b4",
-            borderRadius: "12px",
-            transition: "transform 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-        >
-          <span className="material-icons-outlined me-2">calendar_month</span>
-          <span id="sidebarMenuName">My Orders</span>
-        </Link>
-
-        <Link
-          to={"tablebooking"}
-          id="SideBtn"
-          className="py-2 my-3 ps-3 d-flex align-items-center text-white"
-          style={{
-            backgroundColor: "#ff69b4",
-            borderRadius: "12px",
-            transition: "transform 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-        >
-          <span className="material-icons-outlined me-2">receipt_long</span>
-          <span id="sidebarMenuName">Order Bookings</span>
-        </Link>
+        {[
+          { to: "/dashboard", icon: "person", label: "Profile Page" },
+          { to: "add-services", icon: "design_services", label: "Add Menu" },
+          { to: "schedules-professional", icon: "calendar_month", label: "My Orders" },
+          { to: "tablebooking", icon: "receipt_long", label: "Order Bookings" },
+        ].map((item, index) => (
+          <Link
+            key={index}
+            to={item.to}
+            id="SideBtn"
+            className="py-2 my-3 ps-3 d-flex align-items-center text-white"
+            style={{
+              background: "linear-gradient(to right, #ff7e00, #ff4b2b)",
+              borderRadius: "12px",
+              transition: "transform 0.3s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          >
+            <span className="material-icons-outlined me-2">{item.icon}</span>
+            <span id="sidebarMenuName">{item.label}</span>
+          </Link>
+        ))}
       </div>
 
       {/* Logout Button */}
@@ -140,7 +101,7 @@ const Sidebar = () => {
         <div
           onClick={HandleSignOut}
           style={{
-            background: "linear-gradient(to right, #000, #434343)",
+            background: "linear-gradient(to right, #ff7e00, #ff4b2b)",
             color: "#fff",
             display: "flex",
             alignItems: "center",

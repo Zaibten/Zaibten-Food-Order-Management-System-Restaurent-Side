@@ -582,7 +582,7 @@ const ProfileImgHandle = async (e) => {
           <div className="col-12 mt-4 d-flex justify-content-center align-items-end pb-5">
             <button
               className="py-2 border-0 shadow ripple text-white rounded w-50"
-              style={{ backgroundColor: "#ff69b4" }}
+              style={{ backgroundColor: "#ff7e00" }}
             >
               Submit Details
             </button>

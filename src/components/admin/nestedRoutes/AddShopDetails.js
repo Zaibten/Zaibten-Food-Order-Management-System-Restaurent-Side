@@ -148,7 +148,7 @@ return (
       <h2 className="text-center mb-4">
         <span className="border border-dark px-3 py-2">
           ADD{" "}
-          <span className="text-white px-2 py-2" style={{ backgroundColor: "#ff69b4" }}>
+          <span className="text-white px-2 py-2" style={{ backgroundColor: "#ff7e00" }}>
             MENU
           </span>
         </span>
@@ -239,7 +239,7 @@ return (
             <button
               type="submit"
               className="btn shadow-sm text-white"
-              style={{ backgroundColor: "#ff69b4" }}
+              style={{ backgroundColor: "#ff7e00" }}
             >
               Add Dish
             </button>
